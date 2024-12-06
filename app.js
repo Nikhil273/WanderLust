@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const PORT = process.env.PORT || 8080;
 const mongoose = require("mongoose");
 const Listing = require("./models/listing.js");
 const path = require("path"); //ejs1
@@ -17,19 +18,23 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
+require('dotenv').config();
+
+
+
 connectdb();
 
 const validateListing = (req, res, next) => {
-  let { error } = listingSchema.validate(req.body);
-  if (error) {
-    return next(new ExpressError(error.message, 400));
-    console.log(error);
-  }
-  else {
-    next();
-  }
+  // let { error } = listingSchema.validate(req.body);
+  // if (error) {
+  //   console.log(error);
+  //   return next(new ExpressError(error.message, 400));
+  // }
+  // else {
+  next();
+  // };
 
-}
+};
 
 
 
@@ -51,8 +56,6 @@ app.get("/listings/new", (req, res) => {
 app.post("/listings",
   validateListing,
   wrapAsync(async (req, res, next) => {
-
-
     //adding data to data base and we use new Listing object bcz we follow the schema rule
     const listing = new Listing(req.body.listing);
     await listing.save();
@@ -138,6 +141,6 @@ app.use((err, req, res, next) => {
 
 
 
-app.listen(8080, () => {
-  console.log("server is listening to port  8080");
+app.listen(PORT, () => {
+  console.log(`server is listening to port ${PORT}`);
 });
