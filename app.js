@@ -10,6 +10,8 @@ const connectdb = require("./init/index.js");
 const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/ExpressError.js");
 const { listingSchema } = require("./Schema.js");
+const { reviewSchema } = require("./Schema.js");
+const Review = require("./models/review.js");
 
 //ejs 2,3,4
 app.set("view engine", "ejs");
@@ -19,29 +21,33 @@ app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
 require('dotenv').config();
-
-
-
 connectdb();
 
 const validateListing = (req, res, next) => {
-  // let { error } = listingSchema.validate(req.body);
-  // if (error) {
-  //   console.log(error);
-  //   return next(new ExpressError(error.message, 400));
-  // }
-  // else {
-  next();
-  // };
+  let { error } = listingSchema.validate(req.body);
+  if (error) {
+    console.log(error);
+    throw new ExpressError(error.message, 400);
+  }
+  else {
+    next();
+  };
 
 };
 
-
-
-
+const validateReview = (req, res, next) => {
+  let { error } = reviewSchema.validate(req.body);
+  if (error) {
+    console.log(error);
+    throw new ExpressError(error.message, 400);
+  }
+  else {
+    next();
+  };
+};
 
 //Index Route
-app.get("/listings", wrapAsync(async (req, res) => {
+app.get("/listings", validateListing, wrapAsync(async (req, res) => {
   //  by using Listing.find({}) we are trying to fetch the all data from database
   const allListings = await Listing.find({});
   res.render("listings/index.ejs", { allListings });
@@ -67,7 +73,7 @@ app.post("/listings",
 app.get("/listings/:id", validateListing, wrapAsync(async (req, res) => {
 
   const { id } = req.params;
-  const listing = await Listing.findById(id); // or findOne({ id })
+  const listing = await Listing.findById(id).populate("reviews"); // or findOne({ id })
   if (!listing) {
     console.log("Listing not found");
   } else {
@@ -99,26 +105,19 @@ app.delete("/listings/:id", wrapAsync(async (req, res) => {
   await Listing.findByIdAndDelete(id, { ...req.body.listing });
   res.redirect("/listings")
 }));
-
-
-//-------------------------------------------------------------------------------------------------------//
-// const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust";
-
-// main()
-//   .then(() => {
-//     console.log("connected to DB");
-//   })
-//   .catch((err) => {
-//     console.log(err);
-//   });
-
-// async function main() {
-//   await mongoose.connect(MONGO_URL);
-// }
+//Reviews-post route
+app.post("/listings/:id/review", validateReview, wrapAsync(async (req, res) => {
+  const { id } = req.params;
+  const listing = await Listing.findById(id);
+  const review = new Review(req.body.review);
+  listing.reviews.push(review);
+  await review.save();
+  await listing.save();
+  res.redirect(`/listings/${id}`);
+}));
 
 
 
-// ---------------------------------------------------------------------------------------------------------//
 app.get("/", (req, res) => {
   res.send("Hi, I am root");
 });
