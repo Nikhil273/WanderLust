@@ -1,7 +1,6 @@
 const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 8080;
-const mongoose = require("mongoose");
 const Listing = require("./models/listing.js");
 const path = require("path"); //ejs1
 const methodOverride = require("method-override");
@@ -115,7 +114,14 @@ app.post("/listings/:id/review", validateReview, wrapAsync(async (req, res) => {
   await listing.save();
   res.redirect(`/listings/${id}`);
 }));
-
+// Delte Review
+app.delete("/listings/:id/review/:reviewId", wrapAsync(async (req, res) => {
+  const { id, reviewId } = req.params;
+  console.log(id, reviewId);
+  await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
+  await Review.findByIdAndDelete(reviewId);
+  res.redirect(`/listings/${id}`);
+}));
 
 
 app.get("/", (req, res) => {
