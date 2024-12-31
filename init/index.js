@@ -5,7 +5,7 @@ require('dotenv').config();
 
 function connectdb() {
 
-  const MONGO_URL = process.env.DATABASE_URL || "mongodb+srv://Nikhil:mypass@cluster0.v3q8r.mongodb.net/wanderlust";
+  const MONGO_URL = process.env.DATABASE_URL;
 
 
 

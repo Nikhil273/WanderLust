@@ -41,7 +41,11 @@ app.use((err, req, res, next) => {
 
 })
 
+module.exports = app;
 
-app.listen(PORT, () => {
-  console.log(`server is listening to port ${PORT}`);
-});
+// Only listen if not being run by Vercel
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`server is listening to port ${PORT}`);
+  });
+}
