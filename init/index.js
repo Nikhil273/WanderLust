@@ -5,7 +5,7 @@ require('dotenv').config();
 
 function connectdb() {
 
-  const MONGO_URL = process.env.DATABASE_URL || "mongodb://localhost:27017/mydatabase";
+  const MONGO_URL = process.env.DATABASE_URL || "mongodb+srv://Nikhil:mypass@cluster0.v3q8r.mongodb.net/wanderlust";
 
 
 
@@ -23,8 +23,10 @@ function connectdb() {
     });
 
   async function main() {
-    await mongoose.connect(MONGO_URL);
-  }
+    await mongoose.connect(MONGO_URL, {
+      family: 4,
+    });
+  };
 
   const initDB = async () => {
     try {
