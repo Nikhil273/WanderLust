@@ -37,7 +37,8 @@ router.get("/:id", validateListing, wrapAsync(async (req, res) => {
   const { id } = req.params;
   const listing = await Listing.findById(id).populate("reviews"); // or findOne({ id })
   if (!listing) {
-    console.log("Listing not found");
+    req.flash("error", "Listing you are looking for is not available");
+    res.redirect("/listings");
   } else {
     res.render("listings/show.ejs", { listing });
   }
@@ -49,6 +50,7 @@ router.post("/", validateListing, wrapAsync(async (req, res, next) => {
   //adding data to data base and we use new Listing object bcz we follow the schema rule
   const listing = new Listing(req.body.listing);
   await listing.save();
+  req.flash("success", "Successfully made a new listing!");
   res.redirect("/listings");
 
 }));
@@ -57,7 +59,13 @@ router.post("/", validateListing, wrapAsync(async (req, res, next) => {
 router.get("/:id/edit", validateListing, wrapAsync(async (req, res) => {
   const { id } = req.params;
   const listing = await Listing.findById(id);
-  res.render("listings/edit.ejs", { listing });
+  if (!listing) {
+    req.flash("error", "Listing you are looking for is not available");
+    res.redirect("/listings");
+  } else {
+    res.render("listings/edit.ejs", { listing });
+  }
+
 }));
 
 //update route
@@ -67,6 +75,7 @@ router.put("/:id", validateListing, wrapAsync(async (req, res) => {
   }
   let { id } = req.params;
   await Listing.findByIdAndUpdate(id, { ...req.body.listing });
+  req.flash("success", "Successfully made an update in listing!");
   res.redirect(`/listings/${id}`);
 }));
 
@@ -74,6 +83,7 @@ router.put("/:id", validateListing, wrapAsync(async (req, res) => {
 router.delete("/:id", wrapAsync(async (req, res) => {
   let { id } = req.params;
   await Listing.findByIdAndDelete(id, { ...req.body.listing });
+  req.flash("success", "Listing Deleted Succesfully!");
   res.redirect("/listings")
 }));
 
