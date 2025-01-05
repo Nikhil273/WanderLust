@@ -5,9 +5,9 @@ const path = require("path"); //ejs1
 const methodOverride = require("method-override");
 const ejsMate = require('ejs-mate');
 const connectdb = require("./init/index.js");
-const ExpressError = require("./utils/ExpressError.js");
 const listingRoute = require("./routes/listing.routes.js");
 const reviewRoute = require("./routes/review.routes.js");
+const userRoute = require("./routes/userAuth.routes.js");
 const flash = require("connect-flash");
 const session = require("express-session");
 const passport = require("passport");
@@ -60,20 +60,23 @@ app.use((req, res, next) => {
 });
 
 app.use("/listings", listingRoute);
-app.use("/listings/:id/review", reviewRoute)
+app.use("/listings/:id/review", reviewRoute);
+app.use("/", userRoute);
 
 
+// It will show error if routes that are not defined are accessed
+// app.all("*", (req, res, next) => {
+//   next(new ExpressError("Page Not Found", 404));
+// });
 
-app.all("*", (req, res, next) => {
-  next(new ExpressError("Page Not Found", 404));
-})
 
 app.use((err, req, res, next) => {
   let { statusCode = 500, message } = err;
   res.render("error.ejs", { err });
   // res.status(statusCode).send(message);
-
 });
+
+
 
 module.exports = app;
 
