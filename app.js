@@ -8,6 +8,23 @@ const connectdb = require("./init/index.js");
 const ExpressError = require("./utils/ExpressError.js");
 const listingRoute = require("./routes/listing.routes.js");
 const reviewRoute = require("./routes/review.routes.js");
+const flash = require("connect-flash");
+const session = require("express-session");
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const User = require("./models/user.js");
+
+
+const sessionOptions = {
+  secret: "thisisnotagoodsecret",
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    httpOnly: true,
+    expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+    maxAge: 1000 * 60 * 60 * 24 * 7
+  },
+}
 
 //ejs 2,3,4
 app.set("view engine", "ejs");
@@ -17,16 +34,34 @@ app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
 require('dotenv').config();
-
 connectdb();
 
-app.use("/listings", listingRoute);
-app.use("/listings/:id/review", reviewRoute)
 
 
 app.get("/", (req, res) => {
   res.send("Hi, I am root");
 });
+
+
+app.use(session(sessionOptions));
+app.use(flash()); // use before routes  so that flash messages can be used in routes
+
+//passport configuration
+app.use(passport.initialize()); //initialize passport 
+app.use(passport.session()); //use passport session
+passport.use(new LocalStrategy(User.authenticate())); //use local strategy
+passport.serializeUser(User.serializeUser()); //serialize user
+passport.deserializeUser(User.deserializeUser()); //deserialize user
+
+app.use((req, res, next) => {
+  res.locals.success = req.flash("success");
+  res.locals.error = req.flash("error");
+  next();
+});
+
+app.use("/listings", listingRoute);
+app.use("/listings/:id/review", reviewRoute)
+
 
 
 app.all("*", (req, res, next) => {
@@ -38,8 +73,7 @@ app.use((err, req, res, next) => {
   res.render("error.ejs", { err });
   // res.status(statusCode).send(message);
 
-
-})
+});
 
 module.exports = app;
 
