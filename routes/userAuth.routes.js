@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const User = require("../models/user.js");
-const wrapAsync = require('../utils/wrapAsync.js');
+const wrapAsync = require('../middleware/wrapAsync.js');
 const passport = require('passport');
+const { saveRedirectUrl } = require("../middleware/isLoggedIn.js");
 
 router.get("/signup", (req, res) => {
   res.render("usersAuth/signup.ejs");
@@ -29,10 +30,17 @@ router.get("/login", (req, res) => {
   res.render("usersAuth/login.ejs");
 });
 
-router.post("/login", passport.authenticate("local", { failureRedirect: '/login', failureFlash: true }), wrapAsync(async (req, res) => {
-  req.flash("success", "Welcome back to Wanderlust");
-  res.redirect("/listings");
-}));
+router.post("/login",
+  saveRedirectUrl,
+  passport.authenticate(
+    "local", {
+    failureRedirect: '/login',
+    failureFlash: true
+  }),
+  async (req, res) => {
+    req.flash("success", "Welcome back to Wanderlust");
+    res.redirect(res.locals.returnTo || "/listings");
+  });
 
 router.get("/logout", (req, res, next) => {
   req.flash("success", "You are Logged Out!");
