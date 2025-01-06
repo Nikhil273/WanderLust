@@ -7,8 +7,6 @@ function connectdb() {
 
   const MONGO_URL = process.env.DATABASE_URL;
 
-
-
   // if (!process.env.DATABASE_URL) {
   //   throw new Error("DATABASE_URL is not defined in the environment variables.");
   // };
@@ -23,7 +21,7 @@ function connectdb() {
     });
 
   async function main() {
-    await mongoose.connect(MONGO_URL, {
+    mongoose.connect(MONGO_URL, {
       family: 4,
     });
   };
