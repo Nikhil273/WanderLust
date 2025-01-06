@@ -41,7 +41,7 @@ Then you can use it in your views like this <br>
 
 <br>
 
-### Steps to set-up a _Passport-Local_ Package for Authentication
+### Steps to set-up a `Passport-Local` Package for Authentication
 
 ---
 
@@ -192,5 +192,47 @@ router.post(
       res.redirect("/signup");
     }
   })
+);
+```
+
+#### For Post Login Redirect
+
+If you want to redirect the user to the page where he was before login then you can use `req.session.returnTo` like this -
+
+Add this code in your isLoggedIn or isAuth Middleware-
+
+```javascript
+router.get("/login", (req, res) => {
+  req.session.returnTo = req.headers.referer; // this line will store the previous page url
+  res.render("usersAuth/login.ejs");
+});
+```
+
+```javascript
+// used to store the previous page url in returnTo local variable so that we can use it in our routes
+module.exports.saveRedirectUrl = (req, res, next) => {
+  if (req.session.redirectUrl) {
+    res.locals.returnTo = req.session.redirectUrl;
+  }
+
+  next();
+};
+```
+
+in your login route use this code -
+
+```javascript
+const { saveRedirectUrl } = require("../middleware/isLoggedIn.js");
+router.post(
+  "/login",
+  saveRedirectUrl, // this is the middleware to store the previous page url
+  passport.authenticate("local", {
+    failureRedirect: "/login",
+    failureFlash: true,
+  }),
+  async (req, res) => {
+    req.flash("success", "Welcome back to Wanderlust");
+    res.redirect(res.locals.returnTo || "/listings");
+  }
 );
 ```
