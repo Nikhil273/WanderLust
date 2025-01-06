@@ -1,6 +1,5 @@
 const express = require("express");
 const app = express();
-const PORT = process.env.PORT || 8080;
 const path = require("path"); //ejs1
 const methodOverride = require("method-override");
 const ejsMate = require('ejs-mate');
@@ -13,7 +12,8 @@ const session = require("express-session");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user.js");
-
+require('dotenv').config()
+const PORT = process.env.PORT || 3000;
 
 const sessionOptions = {
   secret: "thisisnotagoodsecret",
