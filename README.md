@@ -41,7 +41,7 @@ Then you can use it in your views like this <br>
 
 <br>
 
-### Steps to set-up a _Passport-Local_ Package for Authentication
+### Steps to set-up a `Passport-Local` Package for Authentication
 
 ---
 
