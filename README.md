@@ -1,3 +1,93 @@
+### Steps to set-up this project on your local machine
+
+---
+
+First Clone this repository on your local machine using this command - <br>
+`git clone` <br>
+Then install all the dependencies using this command - <br>
+`npm install` <br>
+Then create a `.env` file in the root directory of the project and add these lines - <br>
+`PORT=3000` <br>
+`DB_URL=mongodb://localhost:27017/wanderlust` <br>
+Then run the server using this command - <br>
+`npm start` <br>
+Then open your browser and go to this link - <br>
+`http://localhost:3000` <br>
+
+### Steps to set-up a `Mongoose` Database
+
+---
+
+First Install the Mongoose Package using this command - <br>
+`npm install mongoose` <br>
+Then require the Mongoose Package in your app.js or server.js or index.js file - <br>
+`const mongoose = require("mongoose");` <br>
+Then connect to the Mongoose Database using this command - <br>
+
+```javascript
+mongoose.connect(process.env.DB_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useCreateIndex: true,
+  useFindAndModify: false,
+});
+```
+
+<br>
+Then check if the connection is successful or not using this command - <br>
+
+```javascript
+const db = mongoose.connection;
+db.on("error", console.error.bind(console, "connection error:"));
+db.once("open", () => {
+  console.log("Database Connected");
+});
+```
+
+#### Use of `mongoose.populate()` to populate the data from another collection
+
+---
+
+If you want to populate the data from another collection then you can use `mongoose.populate()` like this - <br>
+
+```javascript
+const listing = await Listing.findById(req.params.id).populate("author");
+```
+
+This will populate the author field from the User Collection because in Listing Schema we use pass the referance of the User Collection like this - <br>
+
+```javascript
+const ListingSchema = new Schema({
+  title: String,
+  price: Number,
+  description: String,
+  location: String,
+  author: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+  },
+});
+```
+
+### Setps to set-up EJS Template Engine for Views
+
+---
+
+First Install the EJS Package using this command - <br>
+`npm install ejs` <br>
+Then set the view engine in your app.js or server.js or index.js file - <br>
+
+```javascript
+const path = require("path");
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+```
+
+Then create a views directory in the root directory of the project and create a file with `.ejs` extension
+<br>
+Then render the views in your routes like this - <br>
+`res.render("index.ejs");` <br>
+
 ### Use `connect-flash` to flash the messages
 
 ---
